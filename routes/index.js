@@ -1,6 +1,7 @@
 var users = require('./users');
+var jwt = require('express-jwt');
 
-module.exports = function (app) {
+module.exports = function (app, config) {
 
   /* GET home page. */
   app.get('/', function (req, res, next) {
@@ -8,6 +9,8 @@ module.exports = function (app) {
   });
 
   app.use('/users', users);
+
+  app.use(jwt({secret: config.jwtSecretKey}).unless({path: ['/token']}));
 
 
   // catch 404 and forward to error handler

@@ -25,5 +25,5 @@ module.exports = function (app, config) {
   });
 
   // routes
-  require(config.root + '/routes/index')(app);
+  require(config.root + '/routes/index')(app, config);
 };

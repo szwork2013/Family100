@@ -1,10 +1,12 @@
 var path = require('path'),
   rootPath = path.normalize(__dirname + '/..'),
+  secretKey = "sdflkjlk12_!kjlksd",
   env = process.env.NODE_ENV || 'development';
 
 var config = {
   development: {
     root: rootPath,
+    jwtSecretKey: secretKey,
     app: {
       name: 'family100'
     },
@@ -14,6 +16,7 @@ var config = {
 
   test: {
     root: rootPath,
+    jwtSecretKey: secretKey,
     app: {
       name: 'family100'
     },
@@ -23,6 +26,7 @@ var config = {
 
   production: {
     root: rootPath,
+    jwtSecretKey: secretKey,
     app: {
       name: 'family100'
     },
