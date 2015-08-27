@@ -8,6 +8,9 @@ var db = mongoose.connection;
 db.on('error', function () {
   throw new Error('unable to connect to database at ' + config.db);
 });
+db.on('fullsetup', function () {
+  console.log('connect to mongodb successfully');
+});
 
 var models = glob.sync(config.root + '/app/models/*.js');
 models.forEach(function (model) {

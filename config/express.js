@@ -19,10 +19,10 @@ module.exports = function (app, config) {
   app.use(compress());
   app.use(methodOverride());
 
-  var controllers = glob.sync(config.root + '/app/controllers/*.js');
-  controllers.forEach(function (controller) {
-    require(controller)(app);
-  });
+  //var controllers = glob.sync(config.root + '/app/controllers/*.js');
+  //controllers.forEach(function (controller) {
+  //  require(controller)(app);
+  //});
 
   // routes
   require(config.root + '/routes/index')(app, config);

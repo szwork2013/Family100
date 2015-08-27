@@ -5,6 +5,7 @@ var path = require('path'),
 
 var config = {
   development: {
+    apiVersion: 1.0,
     root: rootPath,
     jwtSecretKey: secretKey,
     app: {
@@ -15,6 +16,7 @@ var config = {
   },
 
   test: {
+    apiVersion: 1.0,
     root: rootPath,
     jwtSecretKey: secretKey,
     app: {
@@ -25,6 +27,7 @@ var config = {
   },
 
   production: {
+    apiVersion: 1.0,
     root: rootPath,
     jwtSecretKey: secretKey,
     app: {
