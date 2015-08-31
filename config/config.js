@@ -1,6 +1,8 @@
 var path = require('path'),
   rootPath = path.normalize(__dirname + '/..'),
-  secretKey = "sdflkjlk12_!kjlksd",
+  secretKey = 'sdflkjlk12_!kjlksd',
+  qiniuAccessKey = process.env.QINIU_ACCESS_KEY,
+  qiniuSecretKey = process.env.QINIU_SECRETKEY,
   env = process.env.NODE_ENV || 'development';
 
 var config = {
@@ -8,6 +10,8 @@ var config = {
     apiVersion: 1.0,
     root: rootPath,
     jwtSecretKey: secretKey,
+    qiniuAccessKey: qiniuAccessKey,
+    qiniuSecretKey: qiniuSecretKey,
     app: {
       name: 'family100'
     },
@@ -19,6 +23,8 @@ var config = {
     apiVersion: 1.0,
     root: rootPath,
     jwtSecretKey: secretKey,
+    qiniuAccessKey: qiniuAccessKey,
+    qiniuSecretKey: qiniuSecretKey,
     app: {
       name: 'family100'
     },
@@ -30,6 +36,8 @@ var config = {
     apiVersion: 1.0,
     root: rootPath,
     jwtSecretKey: secretKey,
+    qiniuAccessKey: qiniuAccessKey,
+    qiniuSecretKey: qiniuSecretKey,
     app: {
       name: 'family100'
     },

@@ -8,9 +8,14 @@ var router = express.Router();
 var HouseController = require('../app/controllers/HouseController');
 
 /* GET cases list. */
-router.get('/', function (req, res, next) {
-  res.send('respond with a resource');
-});
+
+router.route('/')
+  .get(HouseController.getCaseById)
+  .post(HouseController.create)
+  .put()
+  .delete();
+
+
 
 /**
  * 根据case id 获取 case

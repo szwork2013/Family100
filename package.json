@@ -13,7 +13,8 @@
     "glob": "^5.0.3",
     "method-override": "^2.3.0",
     "mongoose": "^4.1.2",
-    "morgan": "^1.6.1"
+    "morgan": "^1.6.1",
+    "qiniu": "^6.1.8"
   },
   "devDependencies": {
     "gulp": "^3.9.0",
