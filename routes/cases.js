@@ -7,13 +7,9 @@ var router = express.Router();
 
 var HouseController = require('../app/controllers/HouseController');
 
-/* GET cases list. */
-
 router.route('/')
-  .get(HouseController.getCaseById)
-  .post(HouseController.create)
-  .put()
-  .delete();
+  .get(HouseController.getCaseById)  // 获取案例列表
+  .post(HouseController.create);     // 新建一个案例
 
 
 

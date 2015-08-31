@@ -44,6 +44,17 @@ HouseSchema.path('name').validate(function (name) {
  * Methods
  */
 
+HouseSchema.methods = {
+  uploadAndSave: function (images, cb) {
+    if (!images || !images.length) {
+      return this.save(cb);
+    }
+
+    // Todo 上传到七牛云
+    this.save(cb);
+  }
+};
+
 /**
  * Statics
  */

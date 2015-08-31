@@ -19,3 +19,25 @@ exports.getCaseById = function (req, res, next) {
     return res.jsont(null, house);
   });
 };
+
+/**
+ * 新建一个装修案例，保存相关信息，并上传图片
+ */
+exports.create = function (req, res, next) {
+  var house = new HouseModel(req.body);
+  var images = req.files.image ? [req.files.image] : undefined;
+
+  house.uploadAndSave(images, function (err) {
+    if (err) {
+      return res.jsont({
+        code: 101,
+        message: '无法保存案例，请稍后重试',
+        errors: [{
+          message: err
+        }]
+      });
+    }
+
+    res.jsont(null, house);
+  });
+};
