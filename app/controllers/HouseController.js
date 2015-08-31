@@ -24,11 +24,18 @@ exports.getCaseById = function (req, res, next) {
  * 列出案例列表
  */
 exports.list = function (req, res, next) {
-  var page = (req.params.page > 0 ? req.params.page : 1) - 1;
+  var page = (req.query.page > 0 ? req.query.page : 1) - 1;
   var perPage = 30;
+  var sort = req.query.sort || 'createAt';
+  var order = req.query.order || 'ASC';
+  var filters = req.query.filter || [];
+
   var options = {
     perPage: perPage,
-    page: page
+    page: page,
+    sort: sort,
+    order: order,
+    filters: filters
   };
 
   HouseModel.list(options, function (err, articles) {

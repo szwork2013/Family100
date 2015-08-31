@@ -11,7 +11,7 @@ var mongoose = require('mongoose'),
  */
 
 var HouseSchema = new Schema({
-  name: {type: String, default: ''},  // 名称
+  name: {type: String, default: '', unique: true},  // 名称
   owner: {type: String, default: ''},  // 业主名称 Todo 可能会是用户，需要加上用户id
   area: Number,  // 户型面积
   package: {type: Number}, // 套餐 Todo 改为 ObjectId
@@ -39,6 +39,10 @@ var HouseSchema = new Schema({
 HouseSchema.path('name').validate(function (name) {
   return name.length;
 }, 'Name cannot be blank');
+
+HouseSchema.path('owner').validate(function (owner) {
+  return owner.length;
+}, 'Owner cannot be blank');
 
 /**
  * Methods
@@ -69,15 +73,26 @@ HouseSchema.statics = {
    * {
    *   criteria: 搜索标准
    *   perPage: 每页几个条目
-   *   page: 第一页（从 0 开始）
+   *   page: 第几页（从 0 开始）
+   *   sort: 排序字段
+   *   order: 排序方式：ASC 升序， DESC 降序
    * }
    */
   list: function (options, cb) {
-    var criteria = options.criteria || {};
+    var filters = options.filters || {};
+    var sort = options.sort || 'createAt';
+    var order = (options.order && options.order === 'DESC') ? -1 : 1;
 
-    this.find(criteria)
+    var sortExpression = {};
+    sortExpression[sort] = order;
+
+    console.log(options);
+
+    console.log(sortExpression);
+
+    this.find({})
       //.populate('user', 'name username')
-      .sort({'createdAt': -1}) // sort by date
+      .sort(sortExpression)
       .limit(options.perPage)
       .skip(options.perPage * options.page)
       .exec(cb);
