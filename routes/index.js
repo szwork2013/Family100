@@ -26,6 +26,15 @@ module.exports = function (app, config) {
     next();
   });
 
+  // allow CORS
+  app.use(function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');  // Todo 特定的跨越请求，而不是全部
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+
+    next();
+  });
+
   app.get('/', function (req, res, next) {
     res.jsont(null, {good: 'night'});
   });
