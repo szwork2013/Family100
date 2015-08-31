@@ -8,7 +8,7 @@ var router = express.Router();
 var HouseController = require('../app/controllers/HouseController');
 
 router.route('/')
-  .get(HouseController.getCaseById)  // 获取案例列表
+  .get(HouseController.list)  // 获取案例列表
   .post(HouseController.create);     // 新建一个案例
 
 

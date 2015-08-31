@@ -14,7 +14,7 @@ var HouseSchema = new Schema({
   name: {type: String, default: ''},  // 名称
   owner: {type: String, default: ''},  // 业主名称 Todo 可能会是用户，需要加上用户id
   area: Number,  // 户型面积
-  package: Schema.Types.ObjectId, // 套餐
+  package: {type: Number}, // 套餐 Todo 改为 ObjectId
   province: {type: String, default: ''}, // 省
   city: {type: String, default: ''},  // 市
   county: {type: String, default: ''}, // 县
@@ -58,5 +58,30 @@ HouseSchema.methods = {
 /**
  * Statics
  */
+
+
+HouseSchema.statics = {
+
+  /**
+   * List
+   *
+   * @param options
+   * {
+   *   criteria: 搜索标准
+   *   perPage: 每页几个条目
+   *   page: 第一页（从 0 开始）
+   * }
+   */
+  list: function (options, cb) {
+    var criteria = options.criteria || {};
+
+    this.find(criteria)
+      //.populate('user', 'name username')
+      .sort({'createdAt': -1}) // sort by date
+      .limit(options.perPage)
+      .skip(options.perPage * options.page)
+      .exec(cb);
+  }
+};
 
 mongoose.model('House', HouseSchema);
