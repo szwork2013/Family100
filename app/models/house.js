@@ -24,8 +24,8 @@ var HouseSchema = new Schema({
     time: Date,  // 时间
     constructionItems: [String],  // 施工项目
     constructionPeople: [{   // 施工人员
-      task: {type: String, default: ''},  // 任务
-      people: [String]  // 人员
+      position: {type: String, default: ''},  // 任务
+      name: [String]  // 人员
     }],
     constructionImages: [String]  // 施工图片的网址
   }],

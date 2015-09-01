@@ -7,7 +7,7 @@ var mongoose = require('mongoose');
 var HouseModel = mongoose.model('House');
 
 exports.getCaseById = function (req, res, next) {
-  HouseModel.findOne(req.param.id, function (err, house) {
+  HouseModel.findById(req.params.id, function (err, house) {
     if (err) {
       return next(err);
     }
