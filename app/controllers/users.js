@@ -5,7 +5,7 @@
 
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
-var utils = require('../../lib/utils');
+var House = mongoose.model('House');
 
 /**
  * Load
@@ -27,22 +27,31 @@ exports.load = function (req, res, next, id) {
  * Create user
  */
 
-exports.create = function (req, res) {
+exports.create = function (req, res, next) {
   var user = new User(req.body);
-  user.provider = 'local';
-  user.save(function (err) {
+  // user.provider = 'local';
+  user.save(function (err, user) {
     if (err) {
-      return res.render('users/signup', {
-        errors: utils.errors(err.errors),
-        user: user,
-        title: 'Sign up'
-      });
+      return res.jsont(err);
     }
+    next(user);
+  });
+};
 
-    // manually login the user once successfully signed up
-    req.logIn(user, function (err) {
-      if (err) req.flash('info', 'Sorry! We are not able to log you in!');
-      return res.redirect('/');
+exports.createAndSaveHouse = function (req, res, next) {
+  var user = new User(req.body);
+  // user.provider = 'local';
+  user.save(function (err, user) {
+    if (err) {
+      return res.jsont(err);
+    }
+    var house = new House(req.body);
+    house.owner = user._id;
+    house.save(function (err) {
+      if (err) {
+        return res.jsont(err);
+      }
+      return res.jsont(null, user);
     });
   });
 };

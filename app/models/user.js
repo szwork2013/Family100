@@ -25,14 +25,15 @@ var UserSchema = new Schema({
   username: {type: String, default: ''},
   phoneNumber: {type: Number, unique: true},
   provider: {type: String, default: ''},
-  hashed_password: {type: String, default: ''},
+  hashedPassword: {type: String, default: ''},
   salt: {type: String, default: ''},
   authToken: {type: String, default: ''},
   facebook: {},
   twitter: {},
   github: {},
   google: {},
-  linkedin: {}
+  linkedin: {},
+  createdAt: {type: Date, default: Date.now}
 });
 
 /**
@@ -44,7 +45,7 @@ UserSchema
   .set(function (password) {
     this._password = password;
     this.salt = this.makeSalt();
-    this.hashed_password = this.encryptPassword(password);
+    this.hashedPassword = this.encryptPassword(password);
   })
   .get(function () {
     return this._password
@@ -92,9 +93,9 @@ UserSchema.path('email').validate(function (phoneNumber, fn) {
 //  return username.length;
 //}, 'Username cannot be blank');
 //
-//UserSchema.path('hashed_password').validate(function (hashed_password) {
+//UserSchema.path('hashedPassword').validate(function (hashedPassword) {
 //  if (this.skipValidation()) return true;
-//  return hashed_password.length && this._password.length;
+//  return hashedPassword.length && this._password.length;
 //}, 'Password cannot be blank');
 
 
@@ -127,7 +128,7 @@ UserSchema.methods = {
    */
 
   authenticate: function (plainText) {
-    return this.encryptPassword(plainText) === this.hashed_password;
+    return this.encryptPassword(plainText) === this.hashedPassword;
   },
 
   generateRandomPassword: function () {

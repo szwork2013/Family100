@@ -12,7 +12,7 @@ var mongoose = require('mongoose'),
 
 var HouseSchema = new Schema({
   name: {type: String, default: '', unique: true},  // 名称
-  owner: {type: String, default: ''},  // 业主名称 Todo 可能会是用户，需要加上用户id
+  owner: {type: Schema.Types.ObjectId, ref: 'User'},  // 业主
   area: Number,  // 户型面积
   package: {type: Number}, // 套餐 Todo 改为 ObjectId
   province: {type: String, default: ''}, // 省
