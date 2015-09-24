@@ -5,17 +5,17 @@
 var express = require('express');
 var router = express.Router();
 
-var HouseController = require('../app/controllers/HouseController');
+var houseController = require('../app/controllers/houses');
 
 router.route('/')
-  .get(HouseController.list)  // 获取案例列表
-  .post(HouseController.create);     // 新建一个案例
+  .get(houseController.list)  // 获取案例列表
+  .post(houseController.create);     // 新建一个案例
 
 
 
 /**
  * 根据case id 获取 case
  */
-router.get('/:id', HouseController.getCaseById);
+router.get('/:id', houseController.getCaseById);
 
 module.exports = router;
