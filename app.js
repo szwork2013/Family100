@@ -17,6 +17,9 @@ var models = glob.sync(config.root + '/app/models/*.js');
 models.forEach(function (model) {
   require(model);
 });
+
+require('./config/schema')(mongoose);
+
 var app = express();
 
 require('./config/express')(app, config);
