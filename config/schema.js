@@ -9,7 +9,7 @@ module.exports = function (mongoose) {
 
   // 给每个 Schema 添加一个 toClient 方法，将 _id 改为 id，
   // 同时删除 __v，用户还可以指定需要删除的字段
-  Schema.method('toClient', function (deleteFields) {
+  Schema.method.toClient = function (deleteFields) {
     var obj = this.toObject();
 
     obj.id = obj._id;
@@ -26,5 +26,5 @@ module.exports = function (mongoose) {
     }
 
     return obj;
-  });
+  };
 };

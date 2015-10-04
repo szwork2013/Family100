@@ -16,7 +16,7 @@ exports.getCaseById = function (req, res, next) {
       return next(new Error('Not Found!'));
     }
 
-    return res.jsont(null, house);
+    return res.jsont(null, house.toClient());
   });
 };
 

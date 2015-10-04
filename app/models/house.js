@@ -49,6 +49,16 @@ HouseSchema.path('owner').validate(function (owner) {
  */
 
 HouseSchema.methods = {
+  toClient: function () {
+    var obj = this.toObject();
+
+    obj.id = obj._id;
+    delete obj._id;
+    delete obj.__v;
+
+    return obj;
+  },
+
   uploadAndSave: function (images, cb) {
     if (!images || !images.length) {
       return this.save(cb);
