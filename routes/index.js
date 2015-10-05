@@ -1,6 +1,7 @@
 var users = require('./users');
 var cases = require('./cases');
 var jwt = require('express-jwt');
+var proxy = require('express-http-proxy');
 
 module.exports = function (app, config) {
 
@@ -42,6 +43,37 @@ module.exports = function (app, config) {
   app.use('/users', users);
 
   app.use('/cases', cases);
+
+  /**
+   * 代理到酷家乐的网站
+   */
+  app.use('/apartments', proxy('yun.kujiale.com', {
+    forwardPath: function (req, res) {
+      //console.log(req);
+      //const path = require('url').parse(req.url).path;
+      //console.log(path);
+
+      return '/api/openfps' + req.url.substring(1);
+    },
+
+    decorateRequest: function (req) {
+      req.headers['Accept-Encoding'] = 'utf8';
+      return req;
+    },
+
+    intercept: function (rsp, data, req, res, callback) {
+      // rsp - original response from the target
+      data = JSON.parse(data.toString('utf8'));
+      var response = {
+        apiVersion: config.apiVersion,
+        data: {
+          itemCount: data.count,
+          items: data.obsExFps
+        }
+      };
+      callback(null, JSON.stringify(response));
+    }
+  }));
 
   // app.use(jwt({secret: config.jwtSecretKey}).unless({path: ['/token']}));
 
