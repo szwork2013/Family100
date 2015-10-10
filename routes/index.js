@@ -75,7 +75,39 @@ module.exports = function (app, config) {
     }
   }));
 
-  // app.use(jwt({secret: config.jwtSecretKey}).unless({path: ['/token']}));
+  app.use('/communities', proxy('yun.kujiale.com', {
+    forwardPath: function (req, res) {
+      var ret = '/api/commsearch' + req.url.substring(1);
+      console.log(ret);
+      return ret;
+    },
+
+    decorateRequest: function (req) {
+      req.headers['Accept-Encoding'] = 'utf8';
+      return req;
+    },
+
+    intercept: function (rsp, data, req, res, callback) {
+      // rsp - original response from the target
+      data = JSON.parse(data.toString('utf8'));
+      var response = {
+        apiVersion: config.apiVersion,
+        data: {
+          items: data
+        }
+      };
+      callback(null, JSON.stringify(response));
+    }
+  }));
+
+  app.post('/auth', function (req, res, next) {
+    console.log(req.body);
+    res.jsont(null, {
+      token: 'safdasfdasfasd'
+    });
+  });
+
+  //app.use(jwt({secret: config.jwtSecretKey}).unless({path: ['/auth']}));
 
 
   //// catch 404 and forward to error handler
