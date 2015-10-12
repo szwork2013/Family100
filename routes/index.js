@@ -1,5 +1,6 @@
 var users = require('./users');
 var cases = require('./cases');
+var categories = require('./categories');
 var jwt = require('express-jwt');
 var proxy = require('express-http-proxy');
 
@@ -43,6 +44,8 @@ module.exports = function (app, config) {
   app.use('/users', users);
 
   app.use('/cases', cases);
+
+  app.use('/categories', categories);
 
   /**
    * 代理到酷家乐的网站
