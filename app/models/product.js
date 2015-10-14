@@ -29,7 +29,11 @@ var ProductSchema = new Schema({
     uploadDate: {type: Date, default: Date.now}
   }],
   options: [{ // 商品的选项，例如 T-shirt 有 Size, Color 等 options
-
+    id: Schema.Types.ObjectId,
+    name: String, // 选项名称，例如： Color,
+    variantKey: String, // 在 variant collection 中的 key
+    order: Number, // 排序位置
+    values: [String] // 选项值，例如：Green、Yellow
   }],
   variants: [{type: Schema.Types.ObjectId, ref: 'Variant'}],
   categoryId: {type: Schema.Types.ObjectId, ref: 'Category'}, // 商品类别

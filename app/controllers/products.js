@@ -5,8 +5,9 @@
 
 var mongoose = require('mongoose');
 var ProductModel = mongoose.model('Product');
+var VariantModel = mongoose.model('Variant');
 
-exports.getCaseById = function (req, res, next) {
+exports.getProductById = function (req, res, next) {
   var id = req.params.id;
   ProductModel.findByIdAndPopulate(id, function (err, product) {
     if (err) {
@@ -78,6 +79,49 @@ exports.create = function (req, res, next) {
     }
 
     res.jsont(null, house);
+  });
+};
+
+/**
+ * 给商品添加一个 variant
+ */
+exports.createVariant = function (req, res, next) {
+  var productId = req.params.productId;
+  var fields = Object.assign({}, req.query, {
+    productId: productId
+  });
+  var variant = new VariantModel(fields);
+
+  variant.save(function (err, variant) {
+    if (err) {
+      return res.jsont({
+        code: 101,
+        message: '无法添加variant，请重试',
+        errors: [{
+          message: err
+        }]
+      });
+    }
+
+    res.jsont(null, variant);
+  });
+};
+
+exports.listVariant = function (req, res, next) {
+  var productId = req.params.productId;
+  var options = req.query; // Todo add options
+  VariantModel.findByProductId(productId, function (err, variants) {
+    if (err) {
+      return res.jsont({
+        code: 102,
+        message: '获取失败，请重试',
+        errors: [{
+          message: err
+        }]
+      });
+    }
+
+    return jsont(null, variants);
   });
 };
 

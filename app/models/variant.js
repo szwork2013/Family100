@@ -67,6 +67,18 @@ VariantSchema.methods = {
 VariantSchema.statics = {
 
   /**
+   * 根据商品id获取单个商品所有的variant
+   *
+   * @param productId
+   * @param cb
+   */
+  findByProductId: function (productId, cb) {
+
+    this.find({productId: productId})
+      .exec(cb);
+  },
+
+  /**
    * List
    *
    * @param options
