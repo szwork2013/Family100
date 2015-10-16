@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "./node_modules/.bin/mocha --compilers js:babel/register --reporter spec --timeout 10000 test/*.test.js"
   },
   "dependencies": {
     "body-parser": "^1.13.3",
@@ -18,9 +19,15 @@
     "qiniu": "^6.1.8"
   },
   "devDependencies": {
+    "babel": "^5.8.23",
+    "faker": "^3.0.1",
     "gulp": "^3.9.0",
-    "gulp-nodemon": "^2.0.2",
     "gulp-livereload": "^3.8.0",
-    "gulp-plumber": "^1.0.0"
+    "gulp-nodemon": "^2.0.2",
+    "gulp-plumber": "^1.0.0",
+    "mocha": "^2.3.3",
+    "mongoose-fakery": "^0.1.7",
+    "should": "^7.1.0",
+    "supertest": "^1.1.0"
   }
 }

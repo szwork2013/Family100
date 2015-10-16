@@ -6,17 +6,30 @@ var express = require('express'),
 
 mongoose.connect(config.db);
 var db = mongoose.connection;
-db.on('error', function () {
+db.on('error', () => {
   throw new Error('unable to connect to database at ' + config.db);
 });
-db.on('fullsetup', function () {
+db.on('connected', () => {
   console.log('connect to mongodb successfully');
+
+  // After connected, use bluebird as mongoose promise
+  mongoose.Promise = require('bluebird');
+});
+
+mongoose.connection.on('disconnected', function () {
+  console.log('Mongoose default connection disconnected');
+});
+
+// If the Node process ends, close the Mongoose connection
+process.on('SIGINT', function () {
+  mongoose.connection.close(function () {
+    console.log('Mongoose default connection disconnected through app termination');
+    process.exit(0);
+  });
 });
 
 var models = glob.sync(config.root + '/app/models/*.js');
-models.forEach(function (model) {
-  require(model);
-});
+models.forEach(model => require(model));
 
 var app = express();
 
@@ -27,7 +40,11 @@ require('./config/express')(app, config);
 qiniu.conf.ACCESS_KEY = config.qiniuAccessKey;
 qiniu.conf.SECRET_KEY = config.qiniuSecretKey;
 
-app.listen(config.port, function () {
-  console.log('Express server listening on port ' + config.port);
-});
+if (!module.parent) {
+  app.listen(
+    config.port,
+    () => console.log('Express server listening on port ' + config.port)
+  );
+}
 
+module.exports = app;
