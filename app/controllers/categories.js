@@ -29,6 +29,40 @@ exports.nestedList = function (req, res, next) {
   })
 };
 
+/**
+ * 创建一个新的商品类别
+ *
+ * 如果是创建子类别，则需有效的 req.body.parentId
+ */
+exports.create = function (req, res, next) {
+  // 父类别 id
+  const parentId = req.body.parentId;
+
+  if (parentId) {
+    if (!mongoose.Types.ObjectId.isValid(parentId)) {
+      return res.jsont({
+        code: 500,  // Todo 定义好code
+        message: 'parent Id is not valid'
+      });
+    }
+
+    return CategoryModel.findById(parentId).exec()
+      .catch(err => res.jsont(err)) // parent id 未找到，返回错误
+      .then(category => [category, new CategoryModel(req.body).save()])
+      .spread((parentCategory, subCategory) => {
+        parentCategory.addSubCategory(subCategory);
+        return subCategory;
+      })
+      .then(category => res.jsont(null, category))
+      .catch(err => res.jsont(err));
+  } else {
+    // 如果参数中没有 parentId，则保存为一级目录
+    new CategoryModel(req.body).save()
+      .then(category => res.jsont(null, category))
+      .catch(err => res.jsont(err));
+  }
+};
+
 
 // Returns a random integer between min (included) and max (excluded)
 // Using Math.round() will give you a non-uniform distribution!
