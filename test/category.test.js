@@ -123,7 +123,7 @@ describe('Categories', () => {
           }).then(subCategoryId =>
             Category.findOne({
               name: '水电类',
-              subCategories: {$in: [subCategoryId]}
+              subCategories: subCategoryId
             }).exec()
         ).then(category => {
             category.should.be.an.instanceOf(Category);
