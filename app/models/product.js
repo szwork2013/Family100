@@ -86,17 +86,18 @@ ProductSchema.statics = {
 
   /**
    * 根据 id 获取商品详情并populate variants
+   *
    * @param id
-   * @param cb
+   * @returns {Promise}
    */
-  findByIdAndPopulate: function (id, cb) {
+  findByIdAndPopulate: function (id) {
     if (!id) {
-      return cb(new Error('product id cannot be blank!'));
+      throw new Error('product id cannot be blank!');
     }
 
-    this.find({_id: id})
+    return this.findById(id)
       .populate("variants")
-      .exec(cb);
+      .exec();
   },
 
   /**

@@ -8,18 +8,28 @@ var ProductModel = mongoose.model('Product');
 var VariantModel = mongoose.model('Variant');
 
 exports.getProductById = function (req, res, next) {
-  var id = req.params.id;
-  ProductModel.findByIdAndPopulate(id, function (err, product) {
-    if (err) {
-      return next(err);
-    }
+  const id = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    res.jsont({
+      code: 404,
+      message: 'invalid id'
+    });
+  }
 
-    if (!product) {
-      return next(new Error('Product with id:' + id + ' Not Found!'));
-    }
-
-    return res.jsont(null, product.toClient());
-  });
+  ProductModel.findByIdAndPopulate(id)
+    .then(product => {
+      if (!product) {
+        return res.jsont({
+          code: 404,
+          message: 'Product with id:' + id + ' Not Found!'
+        })
+      }
+      return res.jsont(null, product.toClient());
+    })
+    .catch(err => res.jsont({
+      code: 404,
+      message: err
+    }));
 };
 
 exports.updateProductById = function (req, res, next) {
