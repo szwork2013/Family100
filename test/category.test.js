@@ -46,11 +46,12 @@ describe('Categories', () => {
           })
           .expect('Content-Type', /application\/json/)
           .expect(function (res) {
-            if (res.data) {
+            var body = res.body;
+            if (body.data) {
               return 'should not contain data field';
             }
 
-            if (!res.error || res.error.message !== 'parent Id is not valid') {
+            if (!body.error || body.error.message !== 'parent Id is not valid') {
               return 'error message not match';
             }
           })
@@ -94,11 +95,12 @@ describe('Categories', () => {
           })
           .expect(200)
           .expect(function (res) {
-            if (res.error) {
+            var body = res.body;
+            if (body.error) {
               return 'should not contain error field';
             }
 
-            if (!res.data || res.data.name !== '水电改造') {
+            if (!body.data || body.data.name !== '水电改造') {
               return 'name not match';
             }
           })
