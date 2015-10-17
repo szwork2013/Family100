@@ -61,25 +61,19 @@ exports.list = function (req, res, next) {
 };
 
 /**
- * 新建一个装修案例，保存相关信息，并上传图片
+ * 新建一个装修案例，保存相关信息
+ * 注意，此方法只接受图片网址，没有上传图片功能
  */
 exports.create = function (req, res, next) {
-  var house = new ProductModel(req.body);
-  var images = req.files ? [req.files] : undefined;
-
-  house.uploadAndSave(images, function (err) {
-    if (err) {
-      return res.jsont({
-        code: 101,
-        message: '无法添加商品，请重试',
-        errors: [{
-          message: err
-        }]
-      });
-    }
-
-    res.jsont(null, house);
-  });
+  new ProductModel(req.body).save()
+    .then(product => res.jsont(null, product))
+    .catch(err => res.jsont({
+      code: 101,
+      message: '无法添加商品，请重试',
+      errors: [{
+        message: err
+      }]
+    }));
 };
 
 /**

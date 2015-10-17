@@ -10,7 +10,7 @@ var mongoose = require('mongoose'),
  * Schema
  */
 var ProductSchema = new Schema({
-  name: {type: String, default: '', unique: true},  // 名称
+  title: {type: String, unique: true},  // 名称
   active: Boolean, // 是否仍在使用
   cost: String, // 成本
   price: Number, // 价格
@@ -58,9 +58,9 @@ ProductSchema.pre('save', function (next) {
  * Validations
  */
 
-ProductSchema.path('name').validate(function (name) {
+ProductSchema.path('title').validate(function (name) {
   return name.length;
-}, 'Name cannot be blank');
+}, 'Title cannot be blank');
 
 /**
  * Methods
