@@ -13,8 +13,10 @@ import { clearDb, generateArray } from './helper'
 const context = describe;
 const agent = request.agent(app);
 const Product = mongoose.model('Product');
+const Variant = mongoose.model('Variant');
 
 let count;
+let testProduct;
 
 
 /**
@@ -122,12 +124,12 @@ describe('Products', () => {
           .expect(function (res) {
             var body = res.body;
             if (body.data) {
-              return 'should not contain data field';
+              throw new Error('should not contain data field');
             }
 
             console.log(body.error);
             if (!body.error) {
-              return 'should contain error field';
+              throw new Error('should contain error field');
             }
           })
           .end(done)
@@ -164,17 +166,65 @@ describe('Products', () => {
               caption: faker.commerce.productAdjective(),
               url: faker.image.fashion(600, 800)
             })),
+            options: [{
+              name: 'Color',
+              variantKey: 'color',
+              order: 0,
+              values: ['Green', 'Yellow']
+            }, {
+              name: 'Size',
+              variantKey: 'size',
+              order: 1,
+              values: ['S', 'M']
+            }],
+            variants: [{
+              name: 'Man Autumn T-shirt Green-S',
+              price: 100,
+              active: true,
+              image: faker.image.fashion(600, 800),
+              options: {
+                color: 'Green',
+                size: 'S'
+              }
+            }, {
+              name: 'Man Autumn T-shirt Green-M',
+              price: 110,
+              active: true,
+              image: faker.image.fashion(600, 800),
+              options: {
+                color: 'Green',
+                size: 'M'
+              }
+            }, {
+              name: 'Man Autumn T-shirt Yellow-S',
+              price: 120,
+              active: true,
+              image: faker.image.fashion(600, 800),
+              options: {
+                color: 'Yellow',
+                size: 'S'
+              }
+            }, {
+              name: 'Man Autumn T-shirt Yellow-M',
+              price: 130,
+              active: true,
+              image: faker.image.fashion(600, 800),
+              options: {
+                color: 'Yellow',
+                size: 'M'
+              }
+            }],
             description: faker.lorem.paragraph()
           })
           .expect(200)
           .expect(function (res) {
             var body = res.body;
             if (body.error) {
-              return 'should not contain error field';
+              throw new Error('should not contain error field');
             }
 
             if (!body.data || body.data.title !== 'Man Autumn T-shirt') {
-              return 'title not match';
+              throw new Error('title not match');
             }
           })
           .end(done)
@@ -187,15 +237,37 @@ describe('Products', () => {
         })
       });
 
-      it('should save the product to the database', () => {
-        return Product.findOne({title: 'Man Autumn T-shirt'}).exec()
+      it('should save the product and 4 variants to the database', () => {
+        return Product.findOne({title: 'Man Autumn T-shirt'}).populate('variant').exec()
           .then(product => {
             product.should.be.an.instanceOf(Product);
             product.title.should.equal('Man Autumn T-shirt');
+            product.variants.length.should.equal(4);
+            testProduct = product;
           });
       });
     });
   });
+
+  //describe(`POST /${testProduct._id}/variants`, () => {
+  //  describe('Invalid parameter', done => {
+  //    agent.post(`/products/${testProduct._id}/variants`)
+  //      .set('Content-Type', 'application/json')
+  //      .send({})
+  //      .expect(200)
+  //      .expect(res => {
+  //        var body = res.body;
+  //        if (body.error) {
+  //          return 'should not contain error field';
+  //        }
+  //
+  //        if (!body.data || body.data.title !== 'Man Autumn T-shirt') {
+  //          return 'title not match';
+  //        }
+  //      })
+  //      .end(done);
+  //  });
+  //});
 
   after(() => {
     return clearDb()
