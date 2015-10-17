@@ -22,6 +22,11 @@ exports.getProductById = function (req, res, next) {
   });
 };
 
+exports.updateProductById = function (req, res, next) {
+  // Todo
+  res.jsont(null, {message: 'todo'});
+};
+
 /**
  * 列出案例列表
  */
@@ -65,15 +70,32 @@ exports.list = function (req, res, next) {
  * 注意，此方法只接受图片网址，没有上传图片功能
  */
 exports.create = function (req, res, next) {
-  new ProductModel(req.body).save()
-    .then(product => res.jsont(null, product))
-    .catch(err => res.jsont({
-      code: 101,
-      message: '无法添加商品，请重试',
-      errors: [{
-        message: err
-      }]
-    }));
+
+  const onSuccess = product => res.jsont(null, product);
+  const onFailure = err => res.jsont({
+    code: -101,
+    message: '无法添加商品，请重试',
+    errors: [{
+      message: err
+    }]
+  });
+
+  const variants = req.body.variants;
+  if (variants) {
+    VariantModel.deduplicateAndSave(variants)
+      .then(variants => {
+        const fields = Object.assign({}, req.body, {
+          variants: variants.map(variant => variant._id)
+        });
+        return new ProductModel(fields).save();
+      })
+      .then(onSuccess)
+      .then(null, onFailure); // Todo why .catch failed?
+  } else {
+    new ProductModel(req.body).save()
+      .then(onSuccess)
+      .catch(onFailure);
+  }
 };
 
 /**

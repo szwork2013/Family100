@@ -11,7 +11,9 @@ router.route('/')
   .get(productController.list)  // 获取商品列表
   .post(productController.create); //增加一个商品
 
-router.get('/:id', productController.getProductById);
+router.route('/:id')
+  .get(productController.getProductById)
+  .put(productController.updateProductById);
 
 
 router.route('/:productId/variants').get(productController.listVariant)  // get all variants of the product

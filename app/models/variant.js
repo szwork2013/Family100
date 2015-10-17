@@ -4,7 +4,7 @@
  */
 var mongoose = require('mongoose'),
   Schema = mongoose.Schema;
-
+var find = require('lodash/collection/find');
 
 /**
  * Schema
@@ -14,10 +14,10 @@ var VariantSchema = new Schema({
   sku: String,
   price: String, // 价格
   active: Boolean, // 是否可用
-  productId: {type: Schema.Types.ObjectId, ref: 'Product'},
-  imageId: Schema.Types.ObjectId, // 对应的图片
+  //productId: {type: Schema.Types.ObjectId, ref: 'Product'},
+  image: String, // 对应的图片
 
-  // 还有其他的属性自动添加
+  options: {}, // 还有其他的属性自动添加到 options 中
 
   createdAt: {type: Date},
   updatedAt: {type: Date}
@@ -77,6 +77,32 @@ VariantSchema.statics = {
     this.find({productId: productId})
       .exec(cb);
   },
+
+
+  deduplicateAndSave: function (variants, productOptions, cb) {
+    var uniqVariants = [];
+    var identifier = [];
+    variants.forEach(variant => {
+      if (!find(identifier, variant.options)) {
+        uniqVariants.push(variant);
+        identifier.push(variant.options);
+      }
+    });
+
+    // Todo Check If all the variants is on productOptions
+    //uniqVariants.forEach(variant => {
+    //  const options = variant.options;
+    //  for (const option in options) {
+    //    if (options.hasOwnProperty(option)) {
+    //      find(productOptions, productOption => {
+    //        return productOption.variantKey && productOption.variantKey === option;
+    //      });
+    //    }
+    //  }
+    //});
+    return this.create(uniqVariants, cb);
+  },
+
 
   /**
    * List
