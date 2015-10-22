@@ -26,7 +26,7 @@ describe('Products', () => {
 
   //it("should save 100 fake products", () => {
   //  var products = generateArray(100, () => new Product({
-  //    title: faker.name.findName(),
+  //    name: faker.name.findName(),
   //    active: faker.random.boolean(),
   //    cost: faker.commerce.price(50, 200),
   //    price: faker.commerce.price(200, 500),
@@ -109,7 +109,7 @@ describe('Products', () => {
           .post('/products')
           .set('Content-Type', 'application/json')
           .send({
-            title: '',
+            name: '',
             active: faker.random.boolean(),
             cost: faker.commerce.price(50, 200),
             price: faker.commerce.price(200, 500),
@@ -157,7 +157,7 @@ describe('Products', () => {
           .post('/products')
           .set('Content-Type', 'application/json')
           .send({
-            title: 'Man Autumn T-shirt',
+            name: 'Man Autumn T-shirt',
             active: faker.random.boolean(),
             cost: faker.commerce.price(50, 200),
             price: faker.commerce.price(200, 500),
@@ -223,8 +223,8 @@ describe('Products', () => {
               throw new Error('should not contain error field');
             }
 
-            if (!body.data || body.data.title !== 'Man Autumn T-shirt') {
-              throw new Error('title not match');
+            if (!body.data || body.data.name !== 'Man Autumn T-shirt') {
+              throw new Error('name not match');
             }
           })
           .end(done)
@@ -238,10 +238,10 @@ describe('Products', () => {
       });
 
       it('should save the product and 4 variants to the database', () => {
-        return Product.findOne({title: 'Man Autumn T-shirt'}).populate('variant').exec()
+        return Product.findOne({name: 'Man Autumn T-shirt'}).populate('variant').exec()
           .then(product => {
             product.should.be.an.instanceOf(Product);
-            product.title.should.equal('Man Autumn T-shirt');
+            product.name.should.equal('Man Autumn T-shirt');
             product.variants.length.should.equal(4);
             testProduct = product;
           });
@@ -261,8 +261,8 @@ describe('Products', () => {
   //          return 'should not contain error field';
   //        }
   //
-  //        if (!body.data || body.data.title !== 'Man Autumn T-shirt') {
-  //          return 'title not match';
+  //        if (!body.data || body.data.name !== 'Man Autumn T-shirt') {
+  //          return 'name not match';
   //        }
   //      })
   //      .end(done);

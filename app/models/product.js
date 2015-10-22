@@ -10,7 +10,7 @@ var mongoose = require('mongoose'),
  * Schema
  */
 var ProductSchema = new Schema({
-  title: {type: String, unique: true},  // 名称
+  name: {type: String, unique: true},  // 名称
   active: Boolean, // 是否仍在使用
   cost: String, // 成本
   price: Number, // 价格
@@ -57,9 +57,9 @@ ProductSchema.pre('save', function (next) {
  * Validations
  */
 
-ProductSchema.path('title').validate(function (name) {
+ProductSchema.path('name').validate(function (name) {
   return name.length;
-}, 'Title cannot be blank');
+}, 'Name cannot be blank');
 
 /**
  * Methods
@@ -83,6 +83,11 @@ ProductSchema.methods = {
 
 
 ProductSchema.statics = {
+
+
+  findByName: function (name, cb) {
+    return this.find({name: name}, cb);
+  },
 
   /**
    * 根据 id 获取商品详情并populate variants
