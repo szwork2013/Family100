@@ -85,8 +85,8 @@ ProductSchema.methods = {
 ProductSchema.statics = {
 
 
-  findByName: function (name, cb) {
-    return this.find({name: name}, cb);
+  findOneByName: function (name, cb) {
+    return this.findOne({name: name}).exec(cb);
   },
 
   /**

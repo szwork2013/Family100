@@ -4,6 +4,7 @@ var categories = require('./categories');
 var products = require('./products');
 var jwt = require('express-jwt');
 var proxy = require('express-http-proxy');
+var paymentController = require('../app/controllers/payments');
 
 module.exports = function (app, config) {
 
@@ -49,6 +50,9 @@ module.exports = function (app, config) {
   app.use('/categories', categories);
 
   app.use('/products', products);
+
+  // Todo user another route
+  app.get('/designpay', paymentController.createDesignPayment);
 
   /**
    * 代理到酷家乐的网站

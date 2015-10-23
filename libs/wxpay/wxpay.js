@@ -54,7 +54,7 @@ WXPay.prototype.createUnifiedOrder = function (opts) {
       passphrase: this.options.mch_id
     }
   }).spread(function (response, body) {
-    console.log('===== request weixin pay code_url successful======');
+    console.log('===== request weixin pay code_url successfully======');
     return Promise.promisify(util.parseXML)(body);
   });
 };
