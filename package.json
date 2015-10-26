@@ -7,6 +7,7 @@
     "test": "./node_modules/.bin/mocha --compilers js:babel/register --reporter spec --timeout 10000 test/*.test.js"
   },
   "dependencies": {
+    "bluebird": "^2.10.2",
     "body-parser": "^1.13.3",
     "compression": "^1.5.2",
     "express": "^4.13.3",
