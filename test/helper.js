@@ -5,6 +5,7 @@
 
 import mongoose from 'mongoose';
 import Promise from 'bluebird';
+const User = mongoose.model('User');
 const Product = mongoose.model('Product');
 const Category = mongoose.model('Category');
 const Variant = mongoose.model('Variant');
@@ -14,6 +15,7 @@ const Variant = mongoose.model('Variant');
  */
 export function clearDb() {
   return Promise.all([
+    User.remove().exec(),
     Product.remove().exec(),
     Category.remove().exec(),
     Variant.remove().exec()
