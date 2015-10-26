@@ -31,7 +31,7 @@ function fetchWeiXinQRCode(order) {
     total_fee: order.totalPrice * 100, // 微信支付的单位按「角」算，所以乘以100
     spbill_create_ip: userIp,
     trade_type: 'NATIVE',
-    notify_url: 'http://family100.cn',
+    notify_url: 'http://family100.cn/wxpay/native/callback',
     product_id: order.items[0].productId + '' // convert to string is important
   }).then(result => {
     console.log(result);
@@ -91,9 +91,9 @@ function getDesignProductModel() {
         return new ProductModel({
           name: designProductName,
           active: true,
-          cost: 99,
-          price: 99,
-          salePrice: 99,
+          cost: 0.01,
+          price: 0.01,
+          salePrice: 0.01,
           images: {
             caption: '云设计图',
             url: ''

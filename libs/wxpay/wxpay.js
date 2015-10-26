@@ -94,7 +94,7 @@ WXPay.prototype.createMerchantPrepayUrl = function (param) {
 };
 
 
-WXPay.prototype.useWXCallback = function (fn) {
+WXPay.useWXCallback = function (fn) {
 
   return function (req, res, next) {
     var _this = this;

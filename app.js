@@ -33,18 +33,19 @@ models.forEach(model => require(model));
 
 var app = express();
 
-require('./config/express')(app, config);
-
 // 七牛的配置
 
 qiniu.conf.ACCESS_KEY = config.qiniuAccessKey;
 qiniu.conf.SECRET_KEY = config.qiniuSecretKey;
 
-if (!module.parent) {
-  app.listen(
+if (!module.parent) { // 防止和 mocha 冲突
+  var server = app.listen(
     config.port,
     () => console.log('Express server listening on port ' + config.port)
   );
 }
+
+var io = require('socket.io')(server);
+require('./config/express')(app, config, io);
 
 module.exports = app;

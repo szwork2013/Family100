@@ -6,8 +6,22 @@ var jwt = require('express-jwt');
 var proxy = require('express-http-proxy');
 var paymentController = require('../app/controllers/payments');
 var userController = require('../app/controllers/users');
+var WXPay = require('../libs/wxpay');
 
-module.exports = function (app, config) {
+module.exports = function (app, config, io) {
+
+  io.path('/ws');
+
+  io.on('connection', function (socket) {
+    console.log('one user is going to pay');
+    socket.on('payment', function (msg) {
+      console.log(msg);
+    });
+
+    socket.on('disconnect', function () {
+      console.log('one user leave payment');
+    });
+  });
 
   /**
    * 定义全局的JSON返回格式
@@ -39,6 +53,12 @@ module.exports = function (app, config) {
 
     next();
   });
+
+  app.use('/wxpay/native/callback', WXPay.useWXCallback(function (msg, req, res, next) {
+    console.log(msg);
+    io.emit('payment-success', msg);
+    res.success();
+  }));
 
   app.get('/', function (req, res, next) {
     res.jsont(null, {good: 'night'});
