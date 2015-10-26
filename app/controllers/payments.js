@@ -24,6 +24,8 @@ function fetchWeiXinQRCode(order) {
   var name = order.combinedName;
   // Todo remove the following line after test
   var userIp = (order.userIp === '::1' || order.userIp === 'localhost') ? '127.0.0.1' : order.userIp;
+  // remove the auto prefix ipv4 address, like: ::ffff:123.1.1.2
+  userIp = userIp.startsWith('::ffff:') ? userIp.substr(7) : userIp;
   return wxpay.createUnifiedOrder({
     body: name,
     detail: name,
