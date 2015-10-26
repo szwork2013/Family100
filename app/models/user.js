@@ -21,19 +21,22 @@ var oAuthTypes = [
 
 var UserSchema = new Schema({
   name: {type: String, default: ''},
-  email: {type: String, default: ''},
   username: {type: String, default: ''},
-  phoneNumber: {type: Number, unique: true},
-  provider: {type: String, default: ''},
+  phoneNumber: {type: String, unique: true},
+  city: {type: String},
+  county: {type: String},
+  apartment: {},
+  provider: {type: String, default: 'local'},
   hashedPassword: {type: String, default: ''},
+  _password: {type: String, default: ''},
   salt: {type: String, default: ''},
-  authToken: {type: String, default: ''},
   facebook: {},
   twitter: {},
   github: {},
   google: {},
   linkedin: {},
-  createdAt: {type: Date, default: Date.now}
+  createdAt: {type: Date},
+  updatedAt: {type: Date}
 });
 
 /**
@@ -59,6 +62,7 @@ var validatePresenceOf = function (value) {
   return value && value.length;
 };
 
+
 // the below 5 validations only apply if you are signing up traditionally
 
 UserSchema.path('name').validate(function (name) {
@@ -68,36 +72,23 @@ UserSchema.path('name').validate(function (name) {
 
 UserSchema.path('phoneNumber').validate(function (phoneNumber) {
   if (this.skipValidation()) return true;
-  return phoneNumber.length;
-}, '电话号码不能为空');
-
-UserSchema.path('phoneNumber').validate(function (phoneNumber) {
-  if (this.skipValidation()) return true;
   return phoneNumber.length === 11;
-}, '电话号码格式错误');
+}, '手机号码长度错误');
 
-UserSchema.path('email').validate(function (phoneNumber, fn) {
-  var User = mongoose.model('User');
-  if (this.skipValidation()) fn(true);
+UserSchema.path('city').validate(function (city) {
+  if (this.skipValidation()) return true;
+  return city.length;
+}, '城市信息不能为空');
 
-  // Check only when it is a new user or when phoneNumber field is modified
-  if (this.isNew || this.isModified('phoneNumber')) {
-    User.find({phoneNumber: phoneNumber}).exec(function (err, users) {
-      fn(!err && users.length === 0);
-    });
-  } else fn(true);
-}, '手机号已存在');
+UserSchema.path('county').validate(function (county) {
+  if (this.skipValidation()) return true;
+  return county.length;
+}, '地区信息不能为空');
 
-//UserSchema.path('username').validate(function (username) {
-//  if (this.skipValidation()) return true;
-//  return username.length;
-//}, 'Username cannot be blank');
-//
-//UserSchema.path('hashedPassword').validate(function (hashedPassword) {
-//  if (this.skipValidation()) return true;
-//  return hashedPassword.length && this._password.length;
-//}, 'Password cannot be blank');
-
+UserSchema.path('apartment').validate(function (apartment) {
+  if (this.skipValidation()) return true;
+  return apartment;
+}, '户型信息不能为空');
 
 /**
  * Pre-save hook
@@ -113,11 +104,34 @@ UserSchema.pre('save', function (next) {
 
 });
 
-/**
+UserSchema.pre('save', function (next) {
+  var now = new Date();
+  this.updatedAt = now;
+  if (!this.createdAt) {
+    this.createdAt = now;
+  }
+  next();
+});
+
+  /**
  * Methods
  */
 
 UserSchema.methods = {
+
+  toClient: function () {
+    var obj = this.toObject();
+
+    obj.id = obj._id;
+    delete obj.hashedPassword;
+    delete obj.password;
+    delete obj._password;
+    delete obj.salt;
+    delete obj._id;
+    delete obj.__v;
+
+    return obj;
+  },
 
   /**
    * Authenticate - check if the passwords are the same

@@ -6,6 +6,8 @@
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var House = mongoose.model('House');
+var jwt = require('jsonwebtoken');
+var config = require('../../config/config');
 
 /**
  * Load
@@ -29,13 +31,13 @@ exports.load = function (req, res, next, id) {
 
 exports.create = function (req, res, next) {
   var user = new User(req.body);
-  // user.provider = 'local';
-  user.save(function (err, user) {
-    if (err) {
-      return res.jsont(err);
-    }
-    next(user);
-  });
+  user.save()
+    .then(user => {
+      var json = user.toClient();
+      json.token = jwt.sign(user, config.jwtSecretKey);
+      res.jsont(null, json);
+    })
+    .catch(err => res.jsont(err));
 };
 
 exports.createAndSaveHouse = function (req, res, next) {

@@ -5,6 +5,7 @@ var products = require('./products');
 var jwt = require('express-jwt');
 var proxy = require('express-http-proxy');
 var paymentController = require('../app/controllers/payments');
+var userController = require('../app/controllers/users');
 
 module.exports = function (app, config) {
 
@@ -43,6 +44,8 @@ module.exports = function (app, config) {
     res.jsont(null, {good: 'night'});
   });
 
+  app.post('/register', userController.create);
+
   app.use('/users', users);
 
   app.use('/cases', cases);
@@ -74,6 +77,7 @@ module.exports = function (app, config) {
     intercept: function (rsp, data, req, res, callback) {
       // rsp - original response from the target
       data = JSON.parse(data.toString('utf8'));
+      console.log(data);
       var response = {
         apiVersion: config.apiVersion,
         data: {
@@ -109,13 +113,6 @@ module.exports = function (app, config) {
       callback(null, JSON.stringify(response));
     }
   }));
-
-  app.post('/auth', function (req, res, next) {
-    console.log(req.body);
-    res.jsont(null, {
-      token: 'safdasfdasfasd'
-    });
-  });
 
   //app.use(jwt({secret: config.jwtSecretKey}).unless({path: ['/auth']}));
 
