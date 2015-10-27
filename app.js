@@ -37,16 +37,13 @@ qiniu.conf.SECRET_KEY = config.qiniuSecretKey;
 
 var app = express();
 
-var http = require('http').Server(app);
-var io = require('socket.io')(http, {path: '/ws', transports: ['polling']});
+require('./config/express')(app, config);
 
-require('./config/express')(app, config, io);
-
-//if (!module.parent) { // 防止和 mocha 冲突
-http.listen(
+if (!module.parent) { // 防止和 mocha 冲突
+  app.listen(
     config.port,
     () => console.log('Express server listening on port ' + config.port)
   );
-//}
+}
 
 module.exports = app;

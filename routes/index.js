@@ -2,46 +2,17 @@ var users = require('./users');
 var cases = require('./cases');
 var categories = require('./categories');
 var products = require('./products');
-var jwt = require('express-jwt');
 var proxy = require('express-http-proxy');
 var paymentController = require('../app/controllers/payments');
 var userController = require('../app/controllers/users');
 var WXPay = require('../libs/wxpay');
 
-module.exports = function (app, config, io) {
+var middleware = require('./middleware');
+var requireAuth = middleware.requireAuth;
 
-  io.on('connection', function (socket) {
-    console.log('one user is going to pay');
-    socket.on('payment', function (msg) {
-      console.log(msg);
-    });
+module.exports = function (app, config) {
 
-    socket.on('disconnect', function () {
-      console.log('one user leave payment');
-    });
-  });
-
-  /**
-   * 定义全局的JSON返回格式
-   *
-   * 返回时使用 res.jsont(err, data) 即可 （jsont => json template)
-   */
-  app.use(function (req, res, next) {
-    res.jsont = function (err, data) {
-      var json = {
-        apiVersion: config.apiVersion
-      };
-
-      if (err) {
-        json['error'] = err;
-      } else {
-        json['data'] = data;
-      }
-
-      res.json(json);
-    };
-    next();
-  });
+  app.use(middleware.jsont);
 
   // allow CORS
   app.use(function (req, res, next) {
@@ -53,18 +24,9 @@ module.exports = function (app, config, io) {
     next();
   });
 
-  app.use('/wxpay/native/callback', WXPay.useWXCallback(function (msg, req, res, next) {
-    console.log('wechat callback');
-    console.log(msg);
-    io.emit('payment-success', msg);
-    res.success();
-  }));
-
   app.get('/', function (req, res, next) {
     res.jsont(null, {good: 'night'});
   });
-
-  app.post('/register', userController.create);
 
   app.use('/users', users);
 
@@ -74,8 +36,12 @@ module.exports = function (app, config, io) {
 
   app.use('/products', products);
 
+  app.post('/register', userController.create);
+
   // Todo user another route
-  app.get('/designpay', paymentController.createDesignPayment);
+  app.get('/designpay', requireAuth, paymentController.createDesignPayment);
+
+  app.use('/wxpay/native/callback', WXPay.useWXCallback(paymentController.wxpayCallback));
 
   /**
    * 代理到酷家乐的网站
@@ -134,37 +100,36 @@ module.exports = function (app, config, io) {
     }
   }));
 
-  //app.use(jwt({secret: config.jwtSecretKey}).unless({path: ['/auth']}));
+  // catch 404 and forward to error handler
+  app.use(function (req, res, next) {
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
+  });
 
+  // error handlers
 
-  //// catch 404 and forward to error handler
-  //app.use(function (req, res, next) {
-  //  var err = new Error('Not Found');
-  //  err.status = 404;
-  //  next(err);
-  //});
-  //
-  //// error handlers
-  //
-  //// development error handler
-  //// will print stacktrace
-  //if (app.get('env') === 'development') {
-  //  app.use(function (err, req, res, next) {
-  //    res.status(err.status || 500);
-  //    res.render('error', {
-  //      message: err.message,
-  //      error: err
-  //    });
-  //  });
-  //}
-  //
-  //// production error handler
-  //// no stacktraces leaked to user
-  //app.use(function (err, req, res, next) {
-  //  res.status(err.status || 500);
-  //  res.render('error', {
-  //    message: err.message,
-  //    error: {}
-  //  });
-  //});
+  // development error handler
+  // will print stacktrace
+  if (app.get('env') === 'development') {
+    app.use(function (err, req, res, next) {
+      res.status(err.status || 500);
+      res.jsont({
+        code: err.status || 500,
+        message: err.message,
+        errors: err
+      });
+    });
+  }
+
+  // production error handler
+  // no stacktraces leaked to user
+  app.use(function (err, req, res, next) {
+    res.status(err.status || 500);
+    res.jsont('error', {
+      code: err.status || 500,
+      message: err.message,
+      errors: {}
+    });
+  });
 };
