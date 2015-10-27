@@ -10,8 +10,6 @@ var WXPay = require('../libs/wxpay');
 
 module.exports = function (app, config, io) {
 
-  io.path('/ws');
-
   io.on('connection', function (socket) {
     console.log('one user is going to pay');
     socket.on('payment', function (msg) {
@@ -47,7 +45,8 @@ module.exports = function (app, config, io) {
 
   // allow CORS
   app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', '*');  // Todo 特定的跨越请求，而不是全部
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3600');  // Todo 特定的跨越请求，而不是全部
+    res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -55,6 +54,7 @@ module.exports = function (app, config, io) {
   });
 
   app.use('/wxpay/native/callback', WXPay.useWXCallback(function (msg, req, res, next) {
+    console.log('wechat callback');
     console.log(msg);
     io.emit('payment-success', msg);
     res.success();

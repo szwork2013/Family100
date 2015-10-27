@@ -31,21 +31,22 @@ process.on('SIGINT', function () {
 var models = glob.sync(config.root + '/app/models/*.js');
 models.forEach(model => require(model));
 
-var app = express();
-
 // 七牛的配置
-
 qiniu.conf.ACCESS_KEY = config.qiniuAccessKey;
 qiniu.conf.SECRET_KEY = config.qiniuSecretKey;
 
-if (!module.parent) { // 防止和 mocha 冲突
-  var server = app.listen(
+var app = express();
+
+var http = require('http').Server(app);
+var io = require('socket.io')(http, {path: '/ws', transports: ['polling']});
+
+require('./config/express')(app, config, io);
+
+//if (!module.parent) { // 防止和 mocha 冲突
+http.listen(
     config.port,
     () => console.log('Express server listening on port ' + config.port)
   );
-}
-
-var io = require('socket.io')(server);
-require('./config/express')(app, config, io);
+//}
 
 module.exports = app;
