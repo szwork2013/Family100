@@ -33,6 +33,7 @@ var OrderSchema = new Schema({
   cancelReason: String, // 取消理由
   closed: Boolean,   // 是否关闭
   userIp: String, // 用户创建订单时的IP
+  paidTime: Date, // 支付的时间
   payVia: String, // 支付的方式
   wxpay: {}, // 微信支付详细信息
   alipay: {},  // 支付宝支付详细信息
@@ -99,6 +100,7 @@ OrderSchema.methods = {
     this.closed = true;
     this.payVia = paymentList.wxpay;
     this.wxpay = message;
+    this.paidTime = new Date();
     return this.save();
   }
 };
