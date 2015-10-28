@@ -16,7 +16,14 @@ exports.jsont = function (req, res, next) {
     };
 
     if (err) {
-      json['error'] = err;
+      if (err instanceof  Error) {
+        json['error'] = {
+          code: err.code,
+          message: err.message
+        }
+      } else {
+        json['error'] = err;
+      }
     } else {
       json['data'] = data;
     }

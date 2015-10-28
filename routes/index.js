@@ -4,9 +4,7 @@ var categories = require('./categories');
 var products = require('./products');
 var orders = require('./orders');
 var proxy = require('express-http-proxy');
-var paymentController = require('../app/controllers/payments');
 var userController = require('../app/controllers/users');
-var WXPay = require('../libs/wxpay');
 
 var middleware = require('./middleware');
 var requireAuth = middleware.requireAuth;
@@ -44,10 +42,6 @@ module.exports = function (app, config) {
   app.use('/orders', orders);
 
   app.post('/register', userController.create);
-
-  app.get('/designpay', requireAuth, paymentController.createDesignPayment);
-
-  app.use('/wxpay/native/callback', WXPay.useWXCallback(paymentController.wxpayCallback));
 
   /**
    * 代理到酷家乐的网站

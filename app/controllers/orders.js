@@ -77,6 +77,23 @@ function getOrCreateDesignOrder(userId, product, userIp) {
     });
 }
 
+exports.getDesignOrder = function (req, res, next) {
+  var user = req.user;
+
+  var userIp = (req.ip === '::1' || req.ip === 'localhost') ? '127.0.0.1' : req.ip;
+  // remove the auto prefix ipv4 address, like: ::ffff:123.1.1.2
+  userIp = userIp.startsWith('::ffff:') ? userIp.substr(7) : userIp;
+
+  getDesignProductModel()
+    .then(product => {
+      return getOrCreateDesignOrder(user._id, product, userIp)
+    }).then(order => {
+      res.jsont(null, order.toClient());
+    }).catch(err => {
+      err.code = err.code || 403;
+      res.jsont(err);
+    })
+};
 
 var wxpay = WXPay({
   appid: config.wxAppId,
@@ -128,7 +145,7 @@ function fetchWeiXinQRCode(order, maxRecursiveTime) {
 
     return Promise.all([order, result, toDataURL(result.code_url)])
       .spread((order, result, qrCodeDataURL) => {
-        return Object.assign({}, order, {
+        return Object.assign({}, order.toClient(), {
           qrCodeURL: result.code_url,
           qrCodeImage: qrCodeDataURL
         });
@@ -144,27 +161,33 @@ function fetchWeiXinQRCode(order, maxRecursiveTime) {
     total_fee: order.totalPrice * 100, // 微信支付的单位按「角」算，所以乘以100
     spbill_create_ip: order.userIp,
     trade_type: 'NATIVE',
-    notify_url: 'http://family100.cn/wxpay/native/callback',
+    notify_url: 'http://family100.cn/orders/wxpay/native/callback',
     product_id: order.items[0].productId + '' // convert to string is important
   })
     .then(result => [order, result])
     .spread(processResult);
 }
 
-exports.createDesignPayment = function (req, res, next) {
+exports.createPayment = function (req, res, next) {
   var user = req.user;
+  var orderId = req.params.orderId;
 
-  var userIp = (req.ip === '::1' || req.ip === 'localhost') ? '127.0.0.1' : req.ip;
-  // remove the auto prefix ipv4 address, like: ::ffff:123.1.1.2
-  userIp = userIp.startsWith('::ffff:') ? userIp.substr(7) : userIp;
+  if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    return res.jsont('invalid order id');
+  }
 
-  getDesignProductModel()
-    .then(product => {
-      return getOrCreateDesignOrder(user._id, product, userIp)
-    }).then(fetchWeiXinQRCode)
+  OrderModel.findById(orderId).exec()
+    .then(order => {
+      if (!order.userId.equals(user._id)) {
+        throw new Error('permission deny');
+      }
+      return order;
+    })
+    .then(fetchWeiXinQRCode)
     .then(result => {
       res.jsont(null, result);
     }).catch(err => {
+      err.code = err.code || 403;
       res.jsont(err);
     });
 };
@@ -260,9 +283,7 @@ exports.checkPaymentStatus = function (req, res, next) {
         })
       }
     }).catch(err => {
-      res.jsont({
-        code: 403,
-        message: err
-      });
+      err.code = 403;
+      res.jsont(err);
     });
 };
