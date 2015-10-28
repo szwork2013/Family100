@@ -5,6 +5,10 @@
 var mongoose = require('mongoose'),
   Schema = mongoose.Schema;
 
+var paymentList = {
+  wxpay: 'wxpay',
+  alipay: 'alipay'
+};
 
 /**
  * Schema
@@ -29,6 +33,9 @@ var OrderSchema = new Schema({
   cancelReason: String, // 取消理由
   closed: Boolean,   // 是否关闭
   userIp: String, // 用户创建订单时的IP
+  payVia: String, // 支付的方式
+  wxpay: {}, // 微信支付详细信息
+  alipay: {},  // 支付宝支付详细信息
   createdAt: {type: Date},
   updatedAt: {type: Date}
 });
@@ -80,6 +87,19 @@ OrderSchema.methods = {
     delete obj.__v;
 
     return obj;
+  },
+  /**
+   * 通过微信支付成功
+   *
+   * @param message 微信支付返回的信息
+   */
+  payViaWx: function (message) {
+    this.paid = true;
+    this.canceled = false;
+    this.closed = true;
+    this.payVia = paymentList.wxpay;
+    this.wxpay = message;
+    return this.save();
   }
 };
 
@@ -89,6 +109,25 @@ OrderSchema.methods = {
 
 
 OrderSchema.statics = {
+
+  /**
+   * 根据用户id 和 商品ids 获取订单
+   * 商品 ids 必须完成匹配，不能多，不能少
+   * @param userId
+   * @param productIds
+   */
+  getOrderByUserIdAndProductIds: function (userId, productIds) {
+    if (!Array.isArray(productIds)) {
+      throw new Error('productIds must be an array');
+    }
+    return this.find({
+      userId: userId,
+      items: {
+        $size: productIds.length,
+        $all: productIds.map(productId => ({'$elemMatch': {productId}}))
+      }
+    }).exec();
+  },
 
   /**
    * List

@@ -7,6 +7,7 @@ var util = require('./util');
 var Promise = require('bluebird');
 var request = Promise.promisify(require('request'));
 var md5 = require('md5');
+var parseXML = Promise.promisify(util.parseXML);
 
 exports = module.exports = WXPay;
 
@@ -38,6 +39,11 @@ WXPay.prototype.sign = function (param) {
   return md5(querystring).toUpperCase();
 };
 
+WXPay.prototype.check = function (info) {
+  return info.appid === this.wxpayID.appid &&
+    info.mch_id === this.options.mch_id;
+};
+
 
 WXPay.prototype.createUnifiedOrder = function (opts) {
   opts.nonce_str = opts.nonce_str || util.generateNonceString();
@@ -55,7 +61,7 @@ WXPay.prototype.createUnifiedOrder = function (opts) {
     }
   }).spread(function (response, body) {
     console.log('===== request weixin pay code_url successfully======');
-    return Promise.promisify(util.parseXML)(body);
+    return parseXML(body);
   });
 };
 
@@ -116,22 +122,22 @@ WXPay.useWXCallback = function (fn) {
 };
 
 
-WXPay.queryOrder = function (query, fn) {
+WXPay.prototype.queryOrder = function (query) {
 
   if (!(query.transaction_id || query.out_trade_no)) {
-    fn(null, {return_code: 'FAIL', return_msg: '缺少参数'});
+    return Promise.resolve({return_code: 'FAIL', return_msg: '缺少参数'});
   }
 
   query.nonce_str = query.nonce_str || util.generateNonceString();
-  util.mix(query, this.wxpayID);
+  query = Object.assign(query, this.wxpayID);
   query.sign = this.sign(query);
 
-  request({
+  return request({
     url: "https://api.mch.weixin.qq.com/pay/orderquery",
     method: "POST",
     body: util.buildXML({xml: query})
-  }, function (err, res, body) {
-    util.parseXML(body, fn);
+  }).spread(function (response, body) {
+    return parseXML(body);
   });
 };
 

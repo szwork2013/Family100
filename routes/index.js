@@ -2,6 +2,7 @@ var users = require('./users');
 var cases = require('./cases');
 var categories = require('./categories');
 var products = require('./products');
+var orders = require('./orders');
 var proxy = require('express-http-proxy');
 var paymentController = require('../app/controllers/payments');
 var userController = require('../app/controllers/users');
@@ -16,12 +17,16 @@ module.exports = function (app, config) {
 
   // allow CORS
   app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:3600');  // Todo 特定的跨越请求，而不是全部
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.header('Access-Control-Allow-Origin', '*');  // Todo 特定的跨越请求，而不是全部
+    //res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Accept,Content-Type,x-access-token');
 
-    next();
+    if ('OPTIONS' == req.method) {
+      res.sendStatus(200);
+    } else {
+      next();
+    }
   });
 
   app.get('/', function (req, res, next) {
@@ -36,9 +41,10 @@ module.exports = function (app, config) {
 
   app.use('/products', products);
 
+  app.use('/orders', orders);
+
   app.post('/register', userController.create);
 
-  // Todo user another route
   app.get('/designpay', requireAuth, paymentController.createDesignPayment);
 
   app.use('/wxpay/native/callback', WXPay.useWXCallback(paymentController.wxpayCallback));
