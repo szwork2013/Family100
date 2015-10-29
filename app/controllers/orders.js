@@ -128,7 +128,7 @@ function fetchWeiXinQRCode(order, maxRecursiveTime) {
                 // 说明微信返回的两次结果不统一
                 throw new Error('Wechat pay: create unified order failed, try again later');
               }
-            });
+            }).then(order => order.toClient());
         case 'SYSTEMERROR': // 系统错误
           if (maxRecursiveTime <= 1) {
             throw new Error('wechat pay: create unified order return SYSTEMERROR more than 5 times');
@@ -178,6 +178,9 @@ exports.createPayment = function (req, res, next) {
 
   OrderModel.findById(orderId).exec()
     .then(order => {
+      if (!order) {
+        throw new Error('order not found');
+      }
       if (!order.userId.equals(user._id)) {
         throw new Error('permission deny');
       }
