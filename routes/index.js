@@ -93,6 +93,7 @@ module.exports = function (app, config) {
       var response = {
         apiVersion: config.apiVersion,
         data: {
+          itemCount: data.length,
           items: data
         }
       };
