@@ -14,6 +14,8 @@ router.get('/designorder', requireAuth, orderController.getDesignOrder);
 
 router.route('/wxpay/native/callback', WXPay.useWXCallback(orderController.wxpayCallback));
 
+router.get('/:orderId', requireAuth, orderController.getOrderById);
+
 router.get('/:orderId/payment', requireAuth, orderController.createPayment);
 router.get('/:orderId/payment/status', requireAuth, orderController.checkPaymentStatus);
 

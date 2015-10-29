@@ -13,6 +13,19 @@ var QRCode = require('qrcode');
 var toDataURL = Promise.promisify(QRCode.toDataURL);
 var config = require('../../config/config');
 
+exports.getOrderById = function (req, res, next) {
+  var orderId = req.orderId;
+  OrderModel.findById(orderId).exec()
+    .then(order => {
+      var json = order ? order.toClient() : null;
+      res.jsont(null, json);
+    })
+    .catch(err => {
+      err.code = 404;
+      res.jsont(err);
+    });
+};
+
 
 var designProductName = "3D云设计方案预付款";
 var designProduct;
