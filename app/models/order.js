@@ -39,6 +39,12 @@ var OrderSchema = new Schema({
   alipay: {},  // 支付宝支付详细信息
   createdAt: {type: Date},
   updatedAt: {type: Date}
+}, {
+  toObject: {
+    virtuals: true
+  }, toJSON: {
+    virtuals: true
+  }
 });
 
 /**
@@ -86,6 +92,7 @@ OrderSchema.methods = {
     obj.id = obj._id;
     delete obj._id;
     delete obj.__v;
+    delete obj.userIp;
 
     return obj;
   },
