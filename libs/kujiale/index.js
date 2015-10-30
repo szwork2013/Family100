@@ -5,10 +5,11 @@
 
 var Promise = require('bluebird');
 var request = Promise.promisify(require('request'));
+//request.debug = true;
 var md5 = require('md5');
 var proxy = require('express-http-proxy');
 var config = require('../../config/config');
-
+var moment = require('moment');
 
 function extractToken(url) {
   if (typeof url !== 'string') {
@@ -60,7 +61,7 @@ KuJiaLe.prototype.sign = function (timestamp, appuid) {
  *
  * @returns Promise
  */
-KuJiaLe.prototype.createUser = function (options, maxRecursiveTime) {
+KuJiaLe.prototype.getLoginUrl = function (options, maxRecursiveTime) {
 
   maxRecursiveTime = maxRecursiveTime || 5;
 
@@ -90,7 +91,8 @@ KuJiaLe.prototype.createUser = function (options, maxRecursiveTime) {
       case 0: // 成功
         return {
           url: body.errorMsg,
-          token: extractToken(body.errorMsg)
+          token: extractToken(body.errorMsg),
+          cookies: response.headers['set-cookie']
         };
       case 10001: //酷家乐系统内部错误
       default: // 说明发送参数有错
@@ -99,6 +101,48 @@ KuJiaLe.prototype.createUser = function (options, maxRecursiveTime) {
         break;
     }
   });
+};
+
+/**
+ * 创建一个3D设计并返回登录链接
+ *
+ * @param loginOptions
+ * @param planId
+ * @param planName
+ */
+KuJiaLe.prototype.createDesignAndGetLoginUrl = function (loginOptions, planId, planName) {
+
+  function createDesign(result, planId, planName) {
+    var datetime = moment().format('YYYY-MM-DD-HHmm');
+    var bashUrl = 'http://yun.kujiale.com';
+    var j = request.jar();
+
+    if (Array.isArray(result.cookies)) {
+      result.cookies.forEach(cookie => j.setCookie(cookie, bashUrl));
+    } else {
+      console.log('kujiale-getLoginUrl: response without cookie')
+    }
+
+    return request({
+      url: `${bashUrl}/api/floorplans/${planId}`,
+      method: 'POST',
+      qs: {
+        floorplanname: planName + '_' + datetime
+      },
+      jar: j
+    }).spread((response, body) => {
+      console.log('body:');
+      console.log(body);
+      var url = 'http://yun.kujiale.com/diy/deco/designid/' + body +
+        '?redirecturl=http://yun.kujiale.com/design/' + body;
+      request.get(url);
+      return result;
+    });
+  }
+
+  return this.getLoginUrl(loginOptions)
+    .then(result => [result, planId, planName])
+    .spread(createDesign);
 };
 
 /**
