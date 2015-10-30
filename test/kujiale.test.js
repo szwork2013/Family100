@@ -24,15 +24,15 @@ var loginOptions = {
 
 describe('Ku Jia Le Api', () => {
 
-  //describe('create user', done => {
-  //  it('should response with token', () => {
-  //    return kujiale.getLoginUrl(loginOptions)
-  //      .then(result => {
-  //      console.log(result);
-  //      result.should.have.property('token');
-  //    });
-  //  })
-  //});
+  describe('create user', done => {
+    it('should response with token', () => {
+      return kujiale.getLoginUrl(loginOptions)
+        .then(result => {
+          console.log(result);
+          result.should.have.property('token');
+        });
+    })
+  });
 
   describe('create a design', done => {
     it('should response with ...', () => {

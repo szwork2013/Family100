@@ -8,6 +8,7 @@ var User = mongoose.model('User');
 var House = mongoose.model('House');
 var jwt = require('jsonwebtoken');
 var config = require('../../config/config');
+var KuJiaLe = require('../../libs/kujiale');
 
 /**
  * Load
@@ -26,19 +27,43 @@ exports.load = function (req, res, next, id) {
 };
 
 /**
+ * 创建一个酷家乐的用户
+ *
+ * @param userModel
+ */
+function createKuJiaLeUser(userModel) {
+  var kujiale = new KuJiaLe({
+    appkey: config.kjlAppKey,
+    appsecret: config.kjlAppSecret
+  });
+
+  var planId = userModel.apartment.obsPlanId;
+  var planName = userModel.apartment.planCity + '-' + userModel.apartment.name;
+
+  return kujiale.createDesignAndGetLoginUrl({
+    id: userModel._id + '',
+    name: userModel.name,
+    phoneNumber: userModel.phoneNumber
+  }, planId, planName);
+}
+
+/**
  * Create user
  */
 
 exports.create = function (req, res, next) {
   var user = new User(req.body);
   user.save()
-    .then(user => {
+    .then(user => [user, createKuJiaLeUser(user)])
+    .spread((user, result) => {
       var json = user.toClient();
       json.token = jwt.sign(user, config.jwtSecretKey);
+      json.kjlUrl = result.url;
       res.jsont(null, json);
     })
     .catch(err => res.jsont(err));
 };
+
 
 exports.createAndSaveHouse = function (req, res, next) {
   var user = new User(req.body);
