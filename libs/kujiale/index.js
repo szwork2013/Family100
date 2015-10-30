@@ -6,6 +6,8 @@
 var Promise = require('bluebird');
 var request = Promise.promisify(require('request'));
 var md5 = require('md5');
+var proxy = require('express-http-proxy');
+var config = require('../../config/config');
 
 
 function extractToken(url) {
@@ -98,5 +100,64 @@ KuJiaLe.prototype.createUser = function (options, maxRecursiveTime) {
     }
   });
 };
+
+/**
+ * 输入汉字或拼音时获取酷家乐的推荐小区
+ */
+KuJiaLe.getApartments = proxy('yun.kujiale.com', {
+  forwardPath: function (req, res) {
+    //console.log(req);
+    //const path = require('url').parse(req.url).path;
+    //console.log(path);
+
+    return '/api/openfps' + req.url.substring(1);
+  },
+
+  decorateRequest: function (req) {
+    req.headers['Accept-Encoding'] = 'utf8';
+    return req;
+  },
+
+  intercept: function (rsp, data, req, res, callback) {
+    // rsp - original response from the target
+    data = JSON.parse(data.toString('utf8'));
+    var response = {
+      apiVersion: config.apiVersion,
+      data: {
+        itemCount: data.count,
+        items: data.obsExFps
+      }
+    };
+    callback(null, JSON.stringify(response));
+  }
+});
+
+/**
+ * 根据小区名称获取该小区的户型图
+ */
+KuJiaLe.getCommunities = proxy('yun.kujiale.com', {
+  forwardPath: function (req, res) {
+    var ret = '/api/commsearch' + req.url.substring(1);
+    return ret;
+  },
+
+  decorateRequest: function (req) {
+    req.headers['Accept-Encoding'] = 'utf8';
+    return req;
+  },
+
+  intercept: function (rsp, data, req, res, callback) {
+    // rsp - original response from the target
+    data = JSON.parse(data.toString('utf8'));
+    var response = {
+      apiVersion: config.apiVersion,
+      data: {
+        itemCount: data.length,
+        items: data
+      }
+    };
+    callback(null, JSON.stringify(response));
+  }
+});
 
 module.exports = KuJiaLe;
