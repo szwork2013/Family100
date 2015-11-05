@@ -11,6 +11,8 @@ router.route('/')
   .post(userController.createAndSaveHouse);
 
 
-router.post('/sms', userController.sendSMSCode);
+router.route('/sms')
+  .get(userController.sendSMSCode) // Todo 为了前端方便,也接受get请求,改进后取消
+  .post(userController.sendSMSCode);
 
 module.exports = router;

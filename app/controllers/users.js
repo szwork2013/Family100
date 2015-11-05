@@ -69,7 +69,7 @@ exports.create = function (req, res, next) {
 
 exports.sendSMSCode = function (req, res, next) {
 
-  var phoneNumber = req.body.phoneNumber;
+  var phoneNumber = req.body.phoneNumber || req.query.phoneNumber;
 
   if (!validator.isMobilePhone(phoneNumber, 'zh-CN')) {
     return res.jsont({
