@@ -7,8 +7,10 @@ var mongoose = require('mongoose');
 var User = mongoose.model('User');
 var House = mongoose.model('House');
 var jwt = require('jsonwebtoken');
+var validator = require('validator');
 var config = require('../../config/config');
 var KuJiaLe = require('../../libs/kujiale');
+var YunPian = require('../../libs/yunpian');
 
 /**
  * Load
@@ -62,6 +64,34 @@ exports.create = function (req, res, next) {
       res.jsont(null, json);
     })
     .catch(err => res.jsont(err));
+};
+
+
+exports.sendSMSCode = function (req, res, next) {
+
+  var phoneNumber = req.body.phoneNumber;
+
+  if (!validator.isMobilePhone(phoneNumber, 'zh-CN')) {
+    return res.jsont({
+      message: 'invalid phone number'
+    })
+  }
+
+
+  var yunPian = new YunPian({
+    apiKey: config.ypApiKey,
+    companyName: '房美丽'
+  });
+
+  yunPian.sendSMS(phoneNumber, req.ip)
+    .then(result => {
+      res.jsont(null, {
+        success: true
+      });
+
+    }).catch(err => {
+    res.jsont(err);
+  })
 };
 
 

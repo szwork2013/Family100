@@ -14,6 +14,9 @@ const context = describe;
 const agent = request.agent(app);
 const User = mongoose.model('User');
 
+var YunPian = require('../libs/yunpian');
+var config = require('../config/config');
+
 let count;
 
 const body = {
@@ -135,6 +138,61 @@ describe('Users', () => {
           count.should.equal(cnt);
           done();
         })
+      })
+    });
+  });
+
+
+  describe('POST /users/sms', () => {
+    describe('Valid parameter', () => {
+      it('should respond with success', done => {
+        agent
+          .post('/users/sms')
+          .send({phoneNumber: '18001292901'})
+          .expect(200)
+          .expect(function (res) {
+            var body = res.body;
+            if (body.error) {
+              console.log(body.error);
+              throw new Error('should not contain error field');
+            }
+
+            if (!body.data || body.data.success !== true) {
+              throw new Error('should response with success');
+            }
+          })
+          .end(done);
+      })
+    });
+
+    describe('request more than twice with the same ip', () => {
+
+      var firstSendTime;
+
+      before(done => {
+        firstSendTime = Date.now();
+        agent
+          .post('/users/sms')
+          .send({phoneNumber: '18001292901'})
+          .expect(200)
+          .end(done);
+      });
+
+      it('should be block', done => {
+        console.log(`interval time: ${Date.now() - firstSendTime} ms`);
+        agent
+          .post('/users/sms')
+          .send({phoneNumber: '18001292901'})
+          .expect(200)
+          .expect(function (res) {
+            var body = res.body;
+            if (body.data) {
+              console.log(body.data);
+              throw new Error('should not contain data field');
+            }
+            console.log(body.error);
+          })
+          .end(done);
       })
     });
   });

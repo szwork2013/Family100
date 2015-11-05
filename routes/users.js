@@ -11,4 +11,6 @@ router.route('/')
   .post(userController.createAndSaveHouse);
 
 
+router.post('/sms', userController.sendSMSCode);
+
 module.exports = router;
