@@ -3,6 +3,7 @@ var cases = require('./cases');
 var categories = require('./categories');
 var products = require('./products');
 var orders = require('./orders');
+var materials = require('./materials');
 var userController = require('../app/controllers/users');
 var KuJiaLe = require('../libs/kujiale');
 
@@ -40,6 +41,8 @@ module.exports = function (app, config) {
   app.use('/products', products);
 
   app.use('/orders', orders);
+
+  app.use('/materials', materials);
 
   app.post('/register', userController.create);
 
