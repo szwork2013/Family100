@@ -15,7 +15,9 @@ var MaterialSchema = new Schema({
   logo: String,
   introduction: String,
   banner: String,
-  details: [String],
+  companyName: String,
+  companyImages: [String],
+  detailImages: [String],
   createdAt: {type: Date},
   updatedAt: {type: Date}
 });

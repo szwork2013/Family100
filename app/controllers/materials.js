@@ -17,6 +17,6 @@ exports.getByName = function (req, res, next) {
         err.code = 404;
         throw err;
       }
-      res.jsont(nul, material.toClient());
+      res.jsont(null, material.toClient());
     }).catch(err => res.jsont(err));
 };
