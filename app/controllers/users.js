@@ -13,9 +13,8 @@ var KuJiaLe = require('../../libs/kujiale');
 var YunPian = require('../../libs/yunpian');
 
 /**
- * Load
+ * 获取用户信息
  */
-
 exports.load = function (req, res, next, id) {
   var options = {
     criteria: {_id: id}
@@ -50,7 +49,26 @@ function createKuJiaLeUser(userModel) {
 }
 
 /**
- * Create user
+ * 获取酷家乐的登录链接
+ *
+ * @param userModel
+ * @returns {Promise}
+ */
+function getKuJiaLeLoginUrl(userModel) {
+  var kujiale = new KuJiaLe({
+    appkey: config.kjlAppKey,
+    appsecret: config.kjlAppSecret
+  });
+
+  return kujiale.getLoginUrl({
+    id: userModel._id + '',
+    name: userModel.name,
+    phoneNumber: userModel.phoneNumber
+  });
+}
+
+/**
+ * Create user, 注册
  */
 
 exports.create = function (req, res, next) {
@@ -88,7 +106,9 @@ exports.create = function (req, res, next) {
     .catch(err => res.jsont(err));
 };
 
-
+/**
+ * 发送短信验证码
+ */
 exports.sendSMSCode = function (req, res, next) {
 
   var phoneNumber = req.body.phoneNumber || req.query.phoneNumber;
@@ -119,6 +139,32 @@ exports.sendSMSCode = function (req, res, next) {
     }).catch(err => {
     res.jsont(err);
   })
+};
+
+exports.login = function (req, res, next) {
+  var phoneNumber = req.body.phoneNumber;
+  var password = req.body.password;
+
+  if (!validator.isMobilePhone(phoneNumber, 'zh-CN')) {
+    return res.jsont({
+      message: '手机号格式不正确'
+    })
+  }
+
+  User.findByPhoneNumber(phoneNumber)
+    .then(user => {
+      if (!user || !user.authenticate(password)) {
+        throw new Error('手机号或密码错误');
+      }
+      return user;
+    }).then(user => [user, getKuJiaLeLoginUrl(user)])
+    .spread((user, result) => {
+      var json = user.toClient();
+      json.token = jwt.sign(user, config.jwtSecretKey);
+      json.kjlUrl = result.url;
+      res.jsont(null, json);
+    })
+    .catch(err => res.jsont(err));
 };
 
 
@@ -152,36 +198,6 @@ exports.show = function (req, res) {
   });
 };
 
-exports.signin = function (req, res) {
-};
-
-/**
- * Auth callback
- */
-
-exports.authCallback = login;
-
-/**
- * Show login form
- */
-
-exports.login = function (req, res) {
-  res.render('users/login', {
-    title: 'Login'
-  });
-};
-
-/**
- * Show sign up form
- */
-
-exports.signup = function (req, res) {
-  res.render('users/signup', {
-    title: 'Sign up',
-    user: new User()
-  });
-};
-
 /**
  * Logout
  */
@@ -190,19 +206,3 @@ exports.logout = function (req, res) {
   req.logout();
   res.redirect('/login');
 };
-
-/**
- * Session
- */
-
-exports.session = login;
-
-/**
- * Login
- */
-
-function login(req, res) {
-  var redirectTo = req.session.returnTo ? req.session.returnTo : '/';
-  delete req.session.returnTo;
-  res.redirect(redirectTo);
-}

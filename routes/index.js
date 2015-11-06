@@ -45,6 +45,7 @@ module.exports = function (app, config) {
   app.use('/materials', materials);
 
   app.post('/register', userController.create);
+  app.post('/login', userController.login);
 
   /**
    * 代理到酷家乐的网站
