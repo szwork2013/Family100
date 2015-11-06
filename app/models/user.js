@@ -28,7 +28,6 @@ var UserSchema = new Schema({
   apartment: {},
   provider: {type: String, default: 'local'},
   hashedPassword: {type: String, default: ''},
-  _password: {type: String, default: ''},
   salt: {type: String, default: ''},
   facebook: {},
   twitter: {},
@@ -194,6 +193,10 @@ UserSchema.methods = {
  */
 
 UserSchema.statics = {
+
+  findByPhoneNumber: function (phoneNumber) {
+    return this.findOne({phoneNumber: phoneNumber}).exec();
+  },
 
   /**
    * Load

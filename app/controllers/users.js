@@ -54,9 +54,31 @@ function createKuJiaLeUser(userModel) {
  */
 
 exports.create = function (req, res, next) {
-  var user = new User(req.body);
-  user.save()
-    .then(user => [user, createKuJiaLeUser(user)])
+
+  var phoneNumber = req.body.phoneNumber;
+  var smsCode = req.body.smsCode;
+
+  if (!validator.isMobilePhone(phoneNumber, 'zh-CN')) {
+    return res.jsont({
+      message: '手机号格式不正确'
+    })
+  }
+
+  User.findByPhoneNumber(phoneNumber)
+    .then(user => {
+      if (user) {
+        throw new Error('手机号已注册')
+      }
+      return true; // Todo return true 有点不大对劲
+    }).then(() => {
+    if (!YunPian.verify(phoneNumber, smsCode)) {
+      throw new Error('短信验证码错误');
+    }
+    return true;
+  }).then(() => {
+    var user = new User(req.body);
+    return user.save()
+  }).then(user => [user, createKuJiaLeUser(user)])
     .spread((user, result) => {
       var json = user.toClient();
       json.token = jwt.sign(user, config.jwtSecretKey);
@@ -73,17 +95,22 @@ exports.sendSMSCode = function (req, res, next) {
 
   if (!validator.isMobilePhone(phoneNumber, 'zh-CN')) {
     return res.jsont({
-      message: 'invalid phone number'
+      message: '手机号格式不正确'
     })
   }
-
 
   var yunPian = new YunPian({
     apiKey: config.ypApiKey,
     companyName: '房美丽'
   });
 
-  yunPian.sendSMS(phoneNumber, req.ip)
+  User.findByPhoneNumber(phoneNumber)
+    .then(user => {
+      if (user) {
+        throw new Error('手机号已注册')
+      }
+      return true; // Todo return true 有点不大对劲
+    }).then(() => yunPian.sendSMS(phoneNumber, req.ip))
     .then(result => {
       res.jsont(null, {
         success: true
