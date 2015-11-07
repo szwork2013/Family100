@@ -83,10 +83,8 @@ describe('Materials', () => {
           items: items
         }
       });
-
-      console.log(JSON.stringify(materials));
-
-      fs.writeFile('./materials.json', JSON.stringify(materials), done);
+      fs.writeSync('./materials.json', JSON.stringify(materials));
+      done();
     });
   });
 

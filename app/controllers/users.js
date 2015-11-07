@@ -99,7 +99,7 @@ exports.create = function (req, res, next) {
   }).then(user => [user, createKuJiaLeUser(user)])
     .spread((user, result) => {
       var json = user.toClient();
-      json.token = jwt.sign(user, config.jwtSecretKey);
+      json.token = jwt.sign(json, config.jwtSecretKey);
       json.kjlUrl = result.url;
       res.jsont(null, json);
     })
@@ -160,7 +160,7 @@ exports.login = function (req, res, next) {
     }).then(user => [user, getKuJiaLeLoginUrl(user)])
     .spread((user, result) => {
       var json = user.toClient();
-      json.token = jwt.sign(user, config.jwtSecretKey);
+      json.token = jwt.sign(json, config.jwtSecretKey);
       json.kjlUrl = result.url;
       res.jsont(null, json);
     })
@@ -189,13 +189,14 @@ exports.createAndSaveHouse = function (req, res, next) {
 /**
  *  Show profile
  */
-
-exports.show = function (req, res) {
-  var user = req.profile;
-  res.render('users/show', {
-    title: user.name,
-    user: user
-  });
+exports.show = function (req, res, next) {
+  var user = req.user;
+  getKuJiaLeLoginUrl(user)
+    .then(result => {
+      user.kjlUrl = result.url;
+      res.jsont(null, user);
+    })
+    .catch(err => res.jsont(err));
 };
 
 /**
