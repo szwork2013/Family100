@@ -112,7 +112,7 @@ UserSchema.pre('save', function (next) {
   next();
 });
 
-  /**
+/**
  * Methods
  */
 
@@ -196,6 +196,10 @@ UserSchema.statics = {
 
   findByPhoneNumber: function (phoneNumber) {
     return this.findOne({phoneNumber: phoneNumber}).exec();
+  },
+
+  findByPhoneNumberAndUpdate: function (phoneNumber, update) {
+    return this.findOneAndUpdate({phoneNumber: phoneNumber}, update).exec();
   },
 
   /**
